@@ -1,8 +1,3 @@
-/**
-  * export BROWSERSTACK_USERNAME=lukerebarchik2 && export BROWSERSTACK_ACCESS_KEY=dtsHnGyZrAgPJ9QaK6Kg
-  * export TESTING_HOST=https://capitalmarketassumptions.com
-**/
-
 var { setWorldConstructor } = require('cucumber');
 
 class TestingWorld {

@@ -8,7 +8,8 @@ Feature: Various important pages load
     Then the page has the copy <Copy>
 
     Examples:
-      | Path            | Copy                                           |
-      | /               | Northern Trust Capital Market Assumptions 2018 |
-      | /1year/         | Northern Trust Capital Market Assumptions      |
-      #| /1year/products | Northern Trust Capital Market Assumptions      |
+      | Path                                      | Copy          |
+      | /search/howsearchworks/                   | Google Search |
+      | /search/howsearchworks/crawling-indexing/ | Google Search |
+      | /search/howsearchworks/algorithms/        | Google Search |
+      | /search/howsearchworks/responses/         | Google Search |
