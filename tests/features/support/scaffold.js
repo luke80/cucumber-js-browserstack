@@ -4,14 +4,14 @@ const { Local } = require('browserstack-local');
 
 BeforeAll((next) => {
   let config = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
-  let task = parseInt(process.env.TASK_ID || 0);
-  config.capabilities[task]['browserstack.user'] = process.env.BROWSERSTACK_USERNAME || null;
-  config.capabilities[task]['browserstack.key'] = process.env.BROWSERSTACK_ACCESS_KEY || null;
-  if(config.capabilities[task]["browserstack.local"]){
+  if (detectEnvironmentProblems(!config.singleSession)) {
+    throw 'Environment configuration error detected. Please verify you have your credentials stored in BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY';
+  }
+  if(config.capabilities[parseInt(process.env.TASK_ID || 0)]["browserstack.local"]){
     // Code to start browserstack local before start of test and stop browserstack local after end of test
     global.bsLocal = new Local();
     let localConfig = {
-      'key': config.capabilities[task]['browserstack.key'],
+      'key': process.env.BROWSERSTACK_ACCESS_KEY,
       'verbose': 'true'
     };
     if (config.proxy) {
@@ -31,14 +31,14 @@ BeforeAll((next) => {
     global.bsLocal.start(localConfig, function(error) {
       if (error) return console.log(error.red);
       if (config.singleSession) {
-        global.driver = global.createBrowserStackSession(config);
+        global.driver = global.createBrowserStackSession();
       }
       next();
     });
   }
   else {
     if (config.singleSession) {
-      global.driver = global.createBrowserStackSession(config);
+      global.driver = global.createBrowserStackSession();
     }
     next();
   }
@@ -49,8 +49,8 @@ Before(function (scenario, done) {
     return 'skipped';
   }
   if (this.oneSessionPerScenario) {
-    this.config.capabilities[this.task_id].name = scenario.pickle.name + ' - ' + scenario.sourceLocation.uri + ' - line ' + scenario.sourceLocation.line;
-    this.driver = global.createBrowserStackSession(this.config);
+    let name = scenario.pickle.name + ' - ' + scenario.sourceLocation.uri + ' - line ' + scenario.sourceLocation.line;
+    this.driver = global.createBrowserStackSession(name);
     done();
   }
   else {
@@ -60,11 +60,10 @@ Before(function (scenario, done) {
 
 After(function (scenario, done) {
   let world = this;
-  //console.log(scenario.result.status);
   if (scenario.result) {
     if (scenario.result.status === 'failed') {
-    //byte[] screenshot = world.driver.getScreenshotAs(OutputType.BYTES);
-    //scenario.embed(screenshot, "image/png");
+      //byte[] screenshot = world.driver.getScreenshotAs(OutputType.BYTES);
+      //scenario.embed(screenshot, "image/png");
     }
   }
   this.driver.sleep(2000).then(() => {
@@ -99,14 +98,26 @@ AfterAll(() => {
   }
 });
 
-global.createBrowserStackSession = function(config) {
+global.createBrowserStackSession = function(name) {
   let b = new Builder();
+  let config = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
+  let task = parseInt(process.env.TASK_ID || 0);
+  config.capabilities[task]['browserstack.user'] = process.env.BROWSERSTACK_USERNAME;
+  config.capabilities[task]['browserstack.key'] = process.env.BROWSERSTACK_ACCESS_KEY;
+  if (name) {
+    config.capabilities[task].name = name;
+  }
   if (config.proxy) {
     b.usingWebDriverProxy("https://http-proxy.com:443");
   }
   return b.usingServer('http://hub-cloud.browserstack.com/wd/hub')
-    .withCapabilities(config.capabilities[parseInt(process.env.TASK_ID || 0)])
+    .withCapabilities(config.capabilities[task])
     .build();
+};
+
+detectEnvironmentProblems = function() {
+  let credentialsMissing = (!process.env.BROWSERSTACK_USERNAME || !process.env.BROWSERSTACK_ACCESS_KEY);
+  return (credentialsMissing);
 };
 
 let timeoutSeconds = 30;
