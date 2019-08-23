@@ -8,9 +8,8 @@
     "url": "git+https://github.com/browserstack/cucumber-js-browserstack.git"
   },
   "scripts": {
-    "test": "npm run single && npm run local && npm run parallel",
-    "math": "cd tests && cross-env CONFIG_FILE=math ../node_modules/.bin/cucumber-js features/math.feature",
-    "test-pages-load": "cd tests && cross-env CONFIG_FILE=single ../node_modules/.bin/cucumber-js features/pages-load.feature"
+    "test": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js",
+    "test-pages-load": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js features/pages-load.feature"
   },
   "devDependencies": {
     "cucumber": "^5.1.0",
