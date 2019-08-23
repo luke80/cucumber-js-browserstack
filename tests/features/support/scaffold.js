@@ -1,4 +1,3 @@
-
 const { BeforeAll, Before, After, AfterAll, setDefaultTimeout } = require('cucumber');
 const { Builder } = require('selenium-webdriver');
 const { Local } = require('browserstack-local');
@@ -16,12 +15,17 @@ BeforeAll((next) => {
       'verbose': 'true'
     };
     if (config.proxy) {
-      var proxyPieces = config.proxy.match(/\w+:\/\/([\d\.]+)(?::(\d+))?/);
-      if (procyPieces.length > 1) {
-        localConfig.proxyHost = proxyPieces[1];
+      var proxyPieces = config.proxy.match(/\w+\:\/\/([\w\.-]+)(?:\:(\d+))?/);
+      if (proxyPieces) {
+        if (proxyPieces.length > 1) {
+          localConfig.proxyHost = proxyPieces[1];
+        }
+        if (proxyPieces.length > 2) {
+          localConfig.proxyPort = proxyPieces[2];
+        }
       }
-      if (procyPieces.length > 2) {
-        localConfig.proxyPort = proxyPieces[2];
+      else {
+        console.warn('Proxy configuration not parsed.');
       }
     }
     global.bsLocal.start(localConfig, function(error) {
@@ -41,6 +45,9 @@ BeforeAll((next) => {
 });
 
 Before(function (scenario, done) {
+  if (process.env.BROWSERSTACK_USERNAME === '' || process.env.BROWSERSTACK_ACCESS_KEY === '') {
+    return 'skipped';
+  }
   if (this.oneSessionPerScenario) {
     this.config.capabilities[this.task_id].name = scenario.pickle.name + ' - ' + scenario.sourceLocation.uri + ' - line ' + scenario.sourceLocation.line;
     this.driver = global.createBrowserStackSession(this.config);
@@ -63,7 +70,8 @@ After(function (scenario, done) {
   this.driver.sleep(2000).then(() => {
     if (world.oneSessionPerScenario) {
       world.driver.session_.then(function(sessionData) {
-        console.log('\nSee the resulting build record on BrowserStack:', 'https://automate.browserstack.com/builds/3a984505514255be9b79fcf96e51897d559cf886/sessions/' + sessionData.id_);
+        console.log('\nBrowserStack Session Complete:', sessionData.id_);
+        //console.log('\nSee the resulting build record on BrowserStack:', `https://automate.browserstack.com/builds/${process.env.BUILD_ID}/sessions/${sessionData.id_}`);
       });
       world.driver.quit().then(done);
     }
@@ -76,8 +84,8 @@ After(function (scenario, done) {
 AfterAll(() => {
   if (global.driver) {
       global.driver.session_.then(function(sessionData) {
-        //console.log(global.driver, sessionData);
-        console.log('\nSee the resulting build record on BrowserStack:', 'https://automate.browserstack.com/builds/3a984505514255be9b79fcf96e51897d559cf886/sessions/' + sessionData.id_);
+        console.log('\nBrowserStack Session Complete:', sessionData.id_);
+        //console.log('\nSee the resulting build record on BrowserStack:', `https://automate.browserstack.com/builds/${process.env.BUILD_ID}/sessions/${sessionData.id_}`);
       });
       global.driver.quit().then(() => {
       if(global.bsLocal) {
@@ -101,5 +109,5 @@ global.createBrowserStackSession = function(config) {
     .build();
 };
 
-let timeoutSeconds = 20;
+let timeoutSeconds = 30;
 setDefaultTimeout(timeoutSeconds * 1000);
