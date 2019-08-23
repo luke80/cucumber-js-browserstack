@@ -7,7 +7,7 @@ BeforeAll((next) => {
   if (detectEnvironmentProblems(!config.singleSession)) {
     throw 'Environment configuration error detected. Please verify you have your credentials stored in BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY';
   }
-  if(config.capabilities[parseInt(process.env.TASK_ID || 0)]["browserstack.local"]){
+  if (config.capabilities[parseInt(process.env.TASK_ID || 0)]["browserstack.local"]) {
     // Code to start browserstack local before start of test and stop browserstack local after end of test
     global.bsLocal = new Local();
     let localConfig = {
@@ -28,7 +28,7 @@ BeforeAll((next) => {
         console.warn('Proxy configuration not parsed.');
       }
     }
-    global.bsLocal.start(localConfig, function(error) {
+    global.bsLocal.start(localConfig, function (error) {
       if (error) return console.log(error.red);
       if (config.singleSession) {
         global.driver = global.createBrowserStackSession();
@@ -68,7 +68,7 @@ After(function (scenario, done) {
   }
   this.driver.sleep(2000).then(() => {
     if (world.oneSessionPerScenario) {
-      world.driver.session_.then(function(sessionData) {
+      world.driver.session_.then(function (sessionData) {
         console.log('\nBrowserStack Session Complete:', sessionData.id_);
         //console.log('\nSee the resulting build record on BrowserStack:', `https://automate.browserstack.com/builds/${process.env.BUILD_ID}/sessions/${sessionData.id_}`);
       });
@@ -82,12 +82,12 @@ After(function (scenario, done) {
 
 AfterAll(() => {
   if (global.driver) {
-      global.driver.session_.then(function(sessionData) {
-        console.log('\nBrowserStack Session Complete:', sessionData.id_);
-        //console.log('\nSee the resulting build record on BrowserStack:', `https://automate.browserstack.com/builds/${process.env.BUILD_ID}/sessions/${sessionData.id_}`);
-      });
-      global.driver.quit().then(() => {
-      if(global.bsLocal) {
+    global.driver.session_.then(function (sessionData) {
+      console.log('\nBrowserStack Session Complete:', sessionData.id_);
+      //console.log('\nSee the resulting build record on BrowserStack:', `https://automate.browserstack.com/builds/${process.env.BUILD_ID}/sessions/${sessionData.id_}`);
+    });
+    global.driver.quit().then(() => {
+      if (global.bsLocal) {
         global.bsLocal.stop(() => { return Promise.resolve(); });
       }
       return Promise.resolve();
@@ -98,7 +98,7 @@ AfterAll(() => {
   }
 });
 
-global.createBrowserStackSession = function(name) {
+global.createBrowserStackSession = function (name) {
   let b = new Builder();
   let config = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
   let task = parseInt(process.env.TASK_ID || 0);
@@ -113,11 +113,6 @@ global.createBrowserStackSession = function(name) {
   return b.usingServer('http://hub-cloud.browserstack.com/wd/hub')
     .withCapabilities(config.capabilities[task])
     .build();
-};
-
-detectEnvironmentProblems = function() {
-  let credentialsMissing = (!process.env.BROWSERSTACK_USERNAME || !process.env.BROWSERSTACK_ACCESS_KEY);
-  return (credentialsMissing);
 };
 
 let timeoutSeconds = 30;
