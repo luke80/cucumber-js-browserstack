@@ -1,4 +1,4 @@
-var {Given,When,Then} = require('cucumber');
+var { When, Then } = require('cucumber');
 var assert = require('cucumber-assert');
 
 When(/^I search "([^"]*)"$/, function (searchQuery, next) {
