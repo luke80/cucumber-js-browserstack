@@ -14,7 +14,7 @@ BeforeAll((next) => {
       'key': process.env.BROWSERSTACK_ACCESS_KEY,
       'verbose': 'true'
     };
-    if (config.proxy) {
+    if (config.proxy && config.proxy !== 'undefined') {
       var proxyPieces = config.proxy.match(/\w+\:\/\/([\w\.-]+)(?:\:(\d+))?/);
       if (proxyPieces) {
         if (proxyPieces.length > 1) {
@@ -102,17 +102,23 @@ global.createBrowserStackSession = function (name) {
   let b = new Builder();
   let config = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
   let task = parseInt(process.env.TASK_ID || 0);
+  let proxy = (config.proxy && config.proxy != 'undefined') ? config.proxy : process.env.PROXY;
   config.capabilities[task]['browserstack.user'] = process.env.BROWSERSTACK_USERNAME;
   config.capabilities[task]['browserstack.key'] = process.env.BROWSERSTACK_ACCESS_KEY;
   if (name) {
     config.capabilities[task].name = name;
   }
-  if (config.proxy) {
-    b.usingWebDriverProxy("https://http-proxy.com:443");
+  if (proxy) {
+    b.usingWebDriverProxy(proxy);
   }
   return b.usingServer('http://hub-cloud.browserstack.com/wd/hub')
     .withCapabilities(config.capabilities[task])
     .build();
+};
+
+detectEnvironmentProblems = function () {
+  let credentialsMissing = (!process.env.BROWSERSTACK_USERNAME || !process.env.BROWSERSTACK_ACCESS_KEY);
+  return (credentialsMissing);
 };
 
 let timeoutSeconds = 30;

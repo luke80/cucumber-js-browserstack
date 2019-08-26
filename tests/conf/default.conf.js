@@ -6,9 +6,8 @@ exports.config = {
   user: `${process.env.BROWSERSTACK_USERNAME}`,
   key: `${process.env.BROWSERSTACK_ACCESS_KEY}`,
   server: 'hub-cloud.browserstack.com',
-  //proxy: 'https://http-proxy.com:443',
+  proxy: `${process.env.PROXY}`,
   protocol: 'https://',
-  host: 'www.google.com',
   singleSession: false,
 
   capabilities: [{
