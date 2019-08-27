@@ -9,9 +9,8 @@ class TestingWorld {
     this.host = ((/^(https?\:\/\/)?((?:\w+\.)+\w+)/.test(process.env.TESTING_HOST)) ? process.env.TESTING_HOST : (this.config.host) ? this.config.host : 'www.capitalmarketassumptions.com').replace(/^https?\:\/\//i, '');
   }
 
-  request(path) {
-    let url = this.protocol + this.host + path;
-    return this.driver.get(url);
+  async request(path) {
+    return await this.driver.get(this.protocol + this.host + path);
   }
 }
 

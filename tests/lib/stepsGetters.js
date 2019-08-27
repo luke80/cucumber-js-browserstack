@@ -28,6 +28,24 @@ module.exports = {
         return mapItem.selector.replace(/%s/g, () => m[i++]);
       }
     };
+    if (!selector) {
+      throw `Invalid selector configured for description ${description}. Make sure you add a valid match into the map file: tests/lib/stepsGetters.js`;
+    }
     return selector;
+  },
+  detectElementWithSelector: async function (selector, driver) {
+    let elements = await driver.findElements({ css: selector });
+    return !!elements.length;
+  },
+  getElementWithSelector: async function (selector, driver) {
+    if (await module.exports.detectElementWithSelector(selector, driver)) {
+      return await driver.findElement({ css: selector });
+    }
+    else {
+      throw `Selector found no elements; '${selector}'`;
+    }
+  },
+  getElement: async function (selectorDescription, driver) {
+    return await module.exports.getElementWithSelector(await module.exports.getSelectorFromDescription(selectorDescription), driver);
   }
 };
