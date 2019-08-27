@@ -7,9 +7,7 @@ logging.getLogger('promise.ControlFlow').setLevel(logging.Level.ALL);
 
 BeforeAll(async () => {
   let config = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
-  if (detectEnvironmentProblems(!config.singleSession)) {
-    throw 'Environment configuration error detected. Please verify you have your credentials stored in BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY. Also ensure you\'ve disabled the promise manager with SELENIUM_PROMISE_MANAGER=0';
-  }
+  detectEnvironmentProblems(!config.singleSession);
   if (config.capabilities[parseInt(process.env.TASK_ID || 0)]["browserstack.local"]) {
     // Code to start browserstack local before start of test and stop browserstack local after end of test
     global.bsLocal = new Local();
@@ -111,7 +109,11 @@ global.createBrowserStackSession = async function (name) {
 detectEnvironmentProblems = function () {
   let credentialsMissing = (!process.env.BROWSERSTACK_USERNAME || !process.env.BROWSERSTACK_ACCESS_KEY);
   let promiseManagerNotDisabled = (!process.env.SELENIUM_PROMISE_MANAGER);
-  return (credentialsMissing || promiseManagerNotDisabled);
+  let problems = (credentialsMissing || promiseManagerNotDisabled);
+  if (problems) {
+    throw 'Environment configuration error detected. Please verify you have your credentials stored in BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY. Also ensure you\'ve disabled the promise manager with SELENIUM_PROMISE_MANAGER=0';
+  }
+  return false;
 };
 
 let timeoutSeconds = 30;
