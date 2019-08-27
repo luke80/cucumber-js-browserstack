@@ -1,3 +1,5 @@
+let assert = require('cucumber-assert');
+
 module.exports = {
   getSelectorFromDescription: function (description) {
     const knownElementsMap = [{
@@ -47,5 +49,21 @@ module.exports = {
   },
   getElement: async function (selectorDescription, driver) {
     return await module.exports.getElementWithSelector(await module.exports.getSelectorFromDescription(selectorDescription), driver);
+  },
+  detectPageSourceMatch: async function (copy, driver) {
+    let test = !(await driver.wait(async function() {
+      return await driver.getPageSource().then(function(source) {
+        return source.indexOf(copy) > -1;
+      });
+    }, 5000));
+    return await assert.notEqual(test, true, `Expected the page to have copy '${copy}', but did not.`);
+  },
+  detectPageTitleMatch: async function (copy, driver) {
+    let test = !(await driver.wait(function() {
+      return driver.getTitle().then(function(title) {
+        return title.indexOf(copy) > -1;
+      });
+    }, 5000));
+    return await assert.notEqual(test, true, `Expected the page to have title copy '${copy}', but did not.`);
   }
 };
