@@ -7,31 +7,36 @@ module.exports = {
     if (pattern instanceof String) {
       pattern = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     }
-    if (pattern instanceof RegExp && !!selector) {
+    if (pattern instanceof RegExp && typeof selector === 'string') {
+      global.selectorMap.push({ pattern: pattern, selector: {css:selector}});
+    }
+    else if (pattern instanceof RegExp && typeof selector === 'object') {
       global.selectorMap.push({ pattern: pattern, selector: selector});
     }
-    else if (pattern instanceof Object && !!selector) {
-      global.selectorMap.push(pattern);
-    }
     else {
-      console.warn('Did not add selector. The format looks bad.', 'The pattern was valid:' + pattern instanceof RegExp, 'The selector was set:' + !!selector);
+      console.warn('Did not add selector. The format looks bad.');
+      throw 'Invalid selector configuration. Please fix it before running the test.';
     }
   },
   getSelectorFromDescription: function (description) {
     const selectorMap = global.selectorMap || [{
       pattern: /the login button\.?/i,
-      selector: 'button.login'
+      selector: {css:'button.login'}
     }, {
       pattern: /the logout button\.?/i,
-      selector: 'button.logout'
+      selector: {css:'button.logout'}
     }];
     let selector;
     for (let mapItem of selectorMap) {
       if (mapItem.pattern instanceof RegExp && (m = mapItem.pattern.exec(description)) !== null) {
         /* jshint -W083 */
         let i = 1;
-        return mapItem.selector.replace(/%s/g, () => m[i++]); // This potentially confusing syntax iteratively replaces %s with matched groups within the pattern regexp.
+        let selectorKey = Object.keys(mapItem.selector)[0];
+        let selectorText = mapItem.selector[selectorKey].replace(/%s/g, () => m[i++]); // This potentially confusing syntax iteratively replaces %s with matched groups within the pattern regexp.
         /* jshint +W083 */
+        selector = {};
+        selector[selectorKey] = selectorText;
+        return selector;
       }
     }
     if (!selector) {
@@ -40,25 +45,46 @@ module.exports = {
     return selector;
   },
   detectElementWithSelector: async function (selector, driver) {
-    let elements = await driver.findElements({ css: selector });
+    let elements = await driver.findElements(selector);
     return !!elements.length;
   },
-  getElementWithSelector: async function (selector, driver) {
+  getElementWithSelector: async function (selector, driver, takeScreenshot=true) {
     if (await module.exports.detectElementWithSelector(selector, driver)) {
-      let element = await driver.findElement({ css: selector });
-      await driver.takeScreenshot(true);
+      let element = await driver.findElement(selector);
+      if (takeScreenshot) {
+        await driver.takeScreenshot(true);
+      }
       return element;
     }
     else {
       throw `Selector found no element; '${selector}'`;
     }
   },
-  getElement: async function (selectorDescription, driver, successSelector=null) {
-    let element = await module.exports.getElementWithSelector(await module.exports.getSelectorFromDescription(selectorDescription), driver);
-    if (!!successSelector) {
-      element = await element.then(getElement(successSelector, driver));
+  getElement: async function (selectorDescription, driver, takeScreenshot=true) {
+    return await module.exports.getElementWithSelector(await module.exports.getSelectorFromDescription(selectorDescription), driver, takeScreenshot);
+  },
+  clickElement: async function (selectorDescription, driver, successSelector=null, takeScreenshot=true) {
+    let element = await module.exports.getElement(selectorDescription, driver, false);
+    if (successSelector !== null) {
+      let test = !(await element.click().then(async () => {
+        return await driver.wait(async function() {
+          let selector = await module.exports.getSelectorFromDescription(successSelector);
+          let element = await module.exports.getElementWithSelector(selector, driver, false);
+          return (!!element && element.isDisplayed());
+        }, 5000);
+      }));
+      if (takeScreenshot) {
+        await driver.takeScreenshot(true);
+      }
+      return test;
     }
-    return element;
+    else {
+      let click = await element.click();
+      if (takeScreenshot) {
+        await driver.takeScreenshot(true);
+      }
+      return click;
+    }
   },
   detectPageSourceMatch: async function (copy, driver) {
     let test = !(await driver.wait(async function() {
@@ -100,5 +126,4 @@ module.exports = {
     await driver.takeScreenshot();
     return page;
   }
-
 };
