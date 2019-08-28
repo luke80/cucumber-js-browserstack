@@ -9,15 +9,17 @@
   },
   "scripts": {
     "test": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js",
+    "test-local": "cd tests && cross-env CONFIG_FILE=local ../node_modules/.bin/cucumber-js",
     "test-pages-load": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js features/pages-load.feature"
   },
   "devDependencies": {
+    "browserstack-local": "^1.4.2",
+    "cross-env": "^5.2.0",
     "cucumber": "^5.1.0",
     "cucumber-assert": "^2.0.1",
+    "dotenv": "^8.1.0",
     "selenium-webdriver": "^4.0.0-alpha.4"
   },
   "dependencies": {
-    "browserstack-local": "^1.4.2",
-    "cross-env": "^5.2.0"
   }
 }
