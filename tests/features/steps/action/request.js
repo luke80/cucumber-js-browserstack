@@ -1,7 +1,8 @@
 const { When, Then } = require("cucumber");
+const { getPage } = require('../../../lib');
 
 When(/^I type in the path ['"]?([^'"]+)['"]?$/i, async function (path) {
-  await this.request(path);
+  await getPage(path, this.driver, this.config);
   if (!(await this.driver.getTitle())) {
     throw `Error retrieving the page at '${path}'`;
   }
