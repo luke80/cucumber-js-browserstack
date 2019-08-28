@@ -10,6 +10,7 @@
   "scripts": {
     "test": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js",
     "test-local": "cd tests && cross-env CONFIG_FILE=local ../node_modules/.bin/cucumber-js",
+    "test-usability": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js features/usability.feature",
     "test-pages-load": "cd tests && cross-env CONFIG_FILE=default ../node_modules/.bin/cucumber-js features/pages-load.feature"
   },
   "devDependencies": {
