@@ -1,6 +1,7 @@
 Feature: Google's Search Functionality
 
   Scenario: Can find search results
-    When I search "BrowserStack"
-    Then I submit
-    Then I should see title "BrowserStack - Google Search"
+    When I type in the path /ncr
+    Then I type "BrowserStack" into "Search the web"
+    Then I click on "Google Search"
+    Then the page has the title "BrowserStack - Google Search"
