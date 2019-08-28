@@ -5,7 +5,7 @@ Feature: Usability tests
 
   Scenario: Test the site speed tester
     When I type in the path /services
-    Then I click on "Improve your Website"
+    Then I click on "Improve your Website" and see "Is your site fast enough?"
     Then I type "www.facebook.com" into "Enter your website URL"
     Then I click on "Test My Site"
     Then a new tab opens and I switch to it
