@@ -1,6 +1,6 @@
-require ('dotenv').config();
+require('dotenv').config();
 var { setWorldConstructor } = require('cucumber');
-var { scaffold } = require('../../lib');
+var { scaffold } = require('cucumber-selenium-browserstack');
 
 let configuration = require('../../conf/' + (process.env.CONFIG_FILE || 'default') + '.conf.js').config;
 scaffold(configuration);

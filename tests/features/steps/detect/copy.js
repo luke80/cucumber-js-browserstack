@@ -1,6 +1,6 @@
 const { Then } = require('cucumber');
 const assert = require('cucumber-assert');
-const { detectPageSourceMatch, detectPageTitleMatch } = require('../../../lib');
+const { detectPageSourceMatch, detectPageTitleMatch } = require('cucumber-selenium-browserstack');
 
 Then(/^the page has the copy ['"]?(.+?)['"]?$/, async function (copy) {
   return await assert.notEqual(detectPageSourceMatch(copy, this.driver), true, `Expected the page to have copy '${copy}', but did not.`);

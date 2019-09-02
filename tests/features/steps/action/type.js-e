@@ -1,5 +1,5 @@
 const { Then } = require("cucumber");
-const { getElement, addSelector } = require('../../../lib');
+const { getElement, addSelector } = require('cucumber-selenium-browserstack');
 
 addSelector(/^(Enter your .+?\.?)$/i, 'input[placeholder=\'%s\']');
 addSelector(/^(Search the web\.?)$/i, 'input[name=\'q\']');

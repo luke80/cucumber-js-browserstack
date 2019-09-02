@@ -1,5 +1,5 @@
 const { When, Then } = require("cucumber");
-const { getPage } = require('../../../lib');
+const { getPage } = require('cucumber-selenium-browserstack');
 
 When(/^I type in the path ['"]?([^'"]+)['"]?$/i, async function (path) {
   await getPage(path, this.driver, this.config);
@@ -10,7 +10,7 @@ When(/^I type in the path ['"]?([^'"]+)['"]?$/i, async function (path) {
 
 Then(/a new tab opens and I switch to it/i, async function () {
   //let currentTab = await this.driver.getWindowHandle();
-  let tabs = await this.driver.getAllWindowHandles(); 
+  let tabs = await this.driver.getAllWindowHandles();
   if (tabs.length > 1) {
     this.driver.switchTo().window(tabs[1]);
     return true;
